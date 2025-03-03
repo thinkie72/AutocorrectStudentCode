@@ -1,0 +1,17 @@
+16
+app
+apple
+ball
+ban
+banana
+bananas
+bat
+ca
+cat
+caterpillar
+eat
+hungry
+likes
+the
+to
+very
