@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Scanner;
 
 /**
@@ -23,7 +24,7 @@ public class Autocorrect {
      * @param threshold The maximum number of edits a suggestion can have.
      */
     public Autocorrect(String[] words, int threshold) {
-        this.dict = words;
+        dict = words;
         this.threshold = threshold;
     }
 
@@ -31,7 +32,7 @@ public class Autocorrect {
      * Runs a test from the tester file, AutocorrectTester.
      * @param typed The (potentially) misspelled word, provided by the user.
      * @return An array of all dictionary words with an edit distance less than or equal
-     * to threshold, sorted by edit distnace, then sorted alphabetically.
+     * to threshold, sorted by edit distance, then sorted alphabetically.
      */
     public String[] runTest(String typed) {
         ArrayList<String>[] test = new ArrayList[threshold];
@@ -54,8 +55,10 @@ public class Autocorrect {
         int index = 0;
         for (ArrayList<String> t : test) {
             // Maybe: sort t alphabetically here
+            Collections.sort(t);
             while (!t.isEmpty()) {
                 arr[index] = t.remove(0);
+                index++;
             }
         }
 
@@ -110,5 +113,16 @@ public class Autocorrect {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void main(String[] args) {
+        Autocorrect a = new Autocorrect(loadDictionary("large"), 6);
+        Scanner s = new Scanner(System.in);
+        System.out.print("Enter word: ");
+        String[] correct = a.runTest(s.nextLine());
+        System.out.println();
+        System.out.println("---");
+        System.out.println();
+
     }
 }
