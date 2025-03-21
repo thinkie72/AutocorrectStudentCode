@@ -15,7 +15,7 @@ import java.util.Scanner;
  * @author Tyler Hinkie
  */
 public class Autocorrect {
-    private String[] dict;
+    private String[] dictionary;
     private int threshold;
 
     /**
@@ -24,8 +24,17 @@ public class Autocorrect {
      * @param threshold The maximum number of edits a suggestion can have.
      */
     public Autocorrect(String[] words, int threshold) {
-        dict = words;
+        dictionary = words;
         this.threshold = threshold;
+    }
+
+    public boolean isWord(String typed) {
+        // Create a Trie for the dictionary
+        Trie dict = new Trie();
+        // Insert each word in the dictionary into the trie version
+        for (String word : dictionary) dict.insert(word);
+
+        return dict.lookup(typed);
     }
 
     /**
@@ -43,7 +52,7 @@ public class Autocorrect {
 
         int ed;
         int arrLen = 0;
-        for (String word : dict) {
+        for (String word : dictionary) {
             ed = editDistance(typed, word);
             if (ed <= threshold) {
                 test[ed - 1].add(word);
@@ -116,13 +125,22 @@ public class Autocorrect {
     }
 
     public static void main(String[] args) {
-        Autocorrect a = new Autocorrect(loadDictionary("large"), 6);
+        Autocorrect a = new Autocorrect(loadDictionary("large"), 2);
         Scanner s = new Scanner(System.in);
-        System.out.print("Enter word: ");
-        String[] correct = a.runTest(s.nextLine());
-        System.out.println();
-        System.out.println("---");
-        System.out.println();
-
+        while (true) {
+            System.out.print("Enter word: ");
+            String typed = s.nextLine();
+            System.out.println();
+            System.out.println("---");
+            System.out.println();
+            if (a.isWord(typed)) System.out.println("Congrats! Your word is, well, a word.");
+            else {
+                String[] correct = a.runTest(typed);
+                for (String x : correct) {
+                    System.out.println(x);
+                }
+            }
+            System.out.println();
+        }
     }
 }
