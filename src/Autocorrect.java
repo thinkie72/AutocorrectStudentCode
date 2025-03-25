@@ -20,12 +20,13 @@ public class Autocorrect {
     private final int NUM_LETTERS = 28;
     private Trie dict;
     private ArrayList<String>[][] candidates;
+    private String[] chosen;
 
     /**
      * Constucts an instance of the Autocorrect class.
      * @param words The dictionary of acceptable words.
      */
-    public Autocorrect(String[] words) {
+    public Autocorrect(String[] words, int threshold) {
 
         candidates = new ArrayList[LONGEST_WORD][MAX_TWO_GRAMS];
 
@@ -45,7 +46,7 @@ public class Autocorrect {
         int twoGram;
 
         // Create a Trie for the dictionary
-        Trie dict = new Trie();
+        dict = new Trie();
         // Insert each word in the dictionary into the trie version
         for (String word : words) dict.insert(word);
     }
@@ -68,26 +69,24 @@ public class Autocorrect {
         return dict.lookup(typed);
     }
 
-    public ArrayList<String> chooseCandidates(String typed) {
+    public void chooseCandidates(String typed) {
         int length = typed.length();
         length--;
-        ArrayList<String> out = new ArrayList<>();
+        ArrayList<String> candidates = new ArrayList<>();
 
         int twoGram;
 
         if (length > 1 && length < 43) {
             for (int i = 0; i < length; i++) {
                 twoGram = hash(typed.substring(i, i + 2));
-                out.addAll(candidates[length][twoGram]);
+                candidates.addAll(this.candidates[length][twoGram]);
                 for (int j = 1; j <= 2; j++) {
-                    out.addAll(candidates[length - i][twoGram]);
-                    out.addAll(candidates[length + i][twoGram]);
+                    candidates.addAll(this.candidates[length - i][twoGram]);
+                    candidates.addAll(this.candidates[length + i][twoGram]);
                 }
             }
-        } else {
-            for (ArrayList<String> a : candidates[length]) out.addAll(a);
-        }
-        return out.toString();
+        } else for (ArrayList<String> a : this.candidates[length]) candidates.addAll(a);
+        chosen = candidates.toArray(new String[0]);
     }
 
     /**
@@ -97,7 +96,10 @@ public class Autocorrect {
      * to threshold, sorted by edit distance, then sorted alphabetically.
      */
     public String[] runTest(String typed) {
-        ArrayList<String>[] test = new ArrayList[threshold];
+
+        if (chosen == null) return null;
+
+        ArrayList<String>[] test = new ArrayList[typed.length()];
 
         for (int i = 0; i < test.length; i++) {
             test[i] = new ArrayList<String>();
@@ -105,26 +107,20 @@ public class Autocorrect {
 
         int ed;
         int arrLen = 0;
-        for (String word : dictionary) {
+        for (String word : chosen) {
             ed = editDistance(typed, word);
-            if (ed <= threshold) {
-                test[ed - 1].add(word);
-                arrLen++;
-            }
+            test[ed - 1].add(word);
+            arrLen++;
         }
 
-        String[] arr = new String[arrLen];
+        String[] out = new String[10];
+
         int index = 0;
         for (ArrayList<String> t : test) {
-            // Maybe: sort t alphabetically here
-            Collections.sort(t);
-            while (!t.isEmpty()) {
-                arr[index] = t.removeFirst();
-                index++;
-            }
+            while (!t.isEmpty() && index < 10) out[index++] = t.removeFirst();
         }
 
-        return arr;
+        return out;
     }
 
     public int editDistance(String typed, String word) {
@@ -178,10 +174,8 @@ public class Autocorrect {
     }
 
     public static void main(String[] args) {
-        Autocorrect a = new Autocorrect(loadDictionary("large"), 2);
+        Autocorrect a = new Autocorrect(loadDictionary("large"), 0);
         Scanner s = new Scanner(System.in);
-        a.makeDict();
-        a.makeCandidates();
         while (true) {
             System.out.print("Enter word: ");
             String typed = s.nextLine();
@@ -191,10 +185,12 @@ public class Autocorrect {
             if (a.isWord(typed)) System.out.println("Congrats! Your word is, well, a word.");
             else if (!typed.isEmpty()){
                 String[] correct;
-                if (typed.length() == 1) correct = a.runTest(typed);
-                else correct = a.chooseCandidates(typed);
-                for (String x : correct) {
-                    System.out.println(x);
+                correct = a.runTest(typed);
+                if (correct == null) System.out.println("Try Again.");
+                else {
+                    for (String x : correct) {
+                        System.out.println(x);
+                    }
                 }
             } else System.out.println("Bruh. Enter a word.");
             System.out.println();
