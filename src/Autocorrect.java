@@ -12,36 +12,75 @@ import java.util.*;
  * @author Tyler Hinkie
  */
 public class Autocorrect {
-    // Define a large prime number p greater than 10^20 for Monte Carlo algo success
-    private static final long P = 9223372036854775783L;
+    // The longest word in the english dictionary (large.txt): pneumonoultramicroscopicsilicovolcanoconiosis
+    private final int LONGEST_WORD = 45;
+    // 28^2 or number of possible 2-grams
+    private final int MAX_TWO_GRAMS = 784;
     // 28 possible characters (letters & ' & -)
-    private static int R = 28;
-    private String[] dictionary;
-    private int threshold;
+    private final int NUM_LETTERS = 28;
     private Trie dict;
+    private ArrayList<String>[][] candidates;
 
     /**
      * Constucts an instance of the Autocorrect class.
      * @param words The dictionary of acceptable words.
-     * @param threshold The maximum number of edits a suggestion can have.
      */
-    public Autocorrect(String[] words, int threshold) {
-        dictionary = words;
-        this.threshold = threshold;
+    public Autocorrect(String[] words) {
+
+        candidates = new ArrayList[LONGEST_WORD][MAX_TWO_GRAMS];
+
+        for (int i = 0; i < LONGEST_WORD; i++) {
+            for (int j = 0; j < MAX_TWO_GRAMS; j++) {
+                candidates[i][j] = new ArrayList<>();
+            }
+        }
+        int length;
+        for (String word : words) {
+            length = word.length();
+            for (int i = 0; i < length; i++) {
+
+            }
+        }
+
+        int twoGram;
 
         // Create a Trie for the dictionary
         Trie dict = new Trie();
         // Insert each word in the dictionary into the trie version
-        for (String word : dictionary) dict.insert(word);
+        for (String word : words) dict.insert(word);
 
+        candidates = new ArrayList[LONGEST_WORD][MAX_TWO_GRAMS];
 
+        for (int i = 0; i < LONGEST_WORD; i++) {
+            for (int j = 0; j < MAX_TWO_GRAMS; j++) {
+                candidates[i][j] = new ArrayList<>();
+            }
+        }
+    }
+
+    // Converts a character into an integer for our alphabet (letters & - & ')
+    private int charToInt(char c) {
+        if (c == '-') return 26;
+        if (c == '\'') return 27;
+        return c - 'a';
+    }
+
+    // Compute two-gram hash using Horner’s Method with base 28
+    private int hash(String word) {
+        int hash = 0;
+        int first;
+        int second;
+        for (int i = 0; i < word.length() - 1; i++) {
+            first = charToInt(word.charAt(i));
+            second = charToInt(word.charAt(i + 1));
+            hash = (hash * NUM_LETTERS + (first * NUM_LETTERS + second)) % MAX_TWO_GRAMS;
+        }
+        return hash;
     }
 
     public boolean isWord(String typed) {
         return dict.lookup(typed);
     }
-
-    public void makeDict()
 
     public String[] chooseCandidates(String typed) {
         // Data structure
@@ -54,16 +93,6 @@ public class Autocorrect {
                 }
             }
         }
-    }
-
-    // Computes a hash for a given string using Horner's method with base R.
-    public long hash(String t) {
-        long hash = 0;
-        int m = t.length();
-        for (int i = 0; i < m; i++) {
-            hash = (hash * R + t.charAt(i)) % P;
-        }
-        return hash;
     }
 
     /**
