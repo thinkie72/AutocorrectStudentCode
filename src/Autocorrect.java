@@ -37,8 +37,8 @@ public class Autocorrect {
         int length;
         for (String word : words) {
             length = word.length();
-            for (int i = 0; i < length; i++) {
-
+            for (int i = 0; i < length - 2; i++) {
+                candidates[length - 1][hash(word.substring(i, i + 2))].add(word);
             }
         }
 
@@ -48,14 +48,6 @@ public class Autocorrect {
         Trie dict = new Trie();
         // Insert each word in the dictionary into the trie version
         for (String word : words) dict.insert(word);
-
-        candidates = new ArrayList[LONGEST_WORD][MAX_TWO_GRAMS];
-
-        for (int i = 0; i < LONGEST_WORD; i++) {
-            for (int j = 0; j < MAX_TWO_GRAMS; j++) {
-                candidates[i][j] = new ArrayList<>();
-            }
-        }
     }
 
     // Converts a character into an integer for our alphabet (letters & - & ')
@@ -67,32 +59,35 @@ public class Autocorrect {
 
     // Compute two-gram hash using Horner’s Method with base 28
     private int hash(String word) {
-        int hash = 0;
-        int first;
-        int second;
-        for (int i = 0; i < word.length() - 1; i++) {
-            first = charToInt(word.charAt(i));
-            second = charToInt(word.charAt(i + 1));
-            hash = (hash * NUM_LETTERS + (first * NUM_LETTERS + second)) % MAX_TWO_GRAMS;
-        }
-        return hash;
+        int first = charToInt(word.charAt(0));
+        int second = charToInt(word.charAt(1));
+        return (first * NUM_LETTERS + second) % MAX_TWO_GRAMS;
     }
 
     public boolean isWord(String typed) {
         return dict.lookup(typed);
     }
 
-    public String[] chooseCandidates(String typed) {
-        // Data structure
+    public ArrayList<String> chooseCandidates(String typed) {
+        int length = typed.length();
+        length--;
+        ArrayList<String> out = new ArrayList<>();
 
-        for (String word : dictionary) {
-            length = word.length();
-            if (length >= 2) {
-                for (int i = 0; i < length - 1; i++) {
+        int twoGram;
 
+        if (length > 1 && length < 43) {
+            for (int i = 0; i < length; i++) {
+                twoGram = hash(typed.substring(i, i + 2));
+                out.addAll(candidates[length][twoGram]);
+                for (int j = 1; j <= 2; j++) {
+                    out.addAll(candidates[length - i][twoGram]);
+                    out.addAll(candidates[length + i][twoGram]);
                 }
             }
+        } else {
+            for (ArrayList<String> a : candidates[length]) out.addAll(a);
         }
+        return out.toString();
     }
 
     /**
@@ -194,14 +189,14 @@ public class Autocorrect {
             System.out.println("---");
             System.out.println();
             if (a.isWord(typed)) System.out.println("Congrats! Your word is, well, a word.");
-            else {
+            else if (!typed.isEmpty()){
                 String[] correct;
                 if (typed.length() == 1) correct = a.runTest(typed);
                 else correct = a.chooseCandidates(typed);
                 for (String x : correct) {
                     System.out.println(x);
                 }
-            }
+            } else System.out.println("Bruh. Enter a word.");
             System.out.println();
         }
     }
