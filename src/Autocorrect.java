@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Autocorrect
@@ -15,8 +12,13 @@ import java.util.Scanner;
  * @author Tyler Hinkie
  */
 public class Autocorrect {
+    // Define a large prime number p greater than 10^20 for Monte Carlo algo success
+    private static final long P = 9223372036854775783L;
+    // 28 possible characters (letters & ' & -)
+    private static int R = 28;
     private String[] dictionary;
     private int threshold;
+    private Trie dict;
 
     /**
      * Constucts an instance of the Autocorrect class.
@@ -26,15 +28,42 @@ public class Autocorrect {
     public Autocorrect(String[] words, int threshold) {
         dictionary = words;
         this.threshold = threshold;
-    }
 
-    public boolean isWord(String typed) {
         // Create a Trie for the dictionary
         Trie dict = new Trie();
         // Insert each word in the dictionary into the trie version
         for (String word : dictionary) dict.insert(word);
 
+
+    }
+
+    public boolean isWord(String typed) {
         return dict.lookup(typed);
+    }
+
+    public void makeDict()
+
+    public String[] chooseCandidates(String typed) {
+        // Data structure
+
+        for (String word : dictionary) {
+            length = word.length();
+            if (length >= 2) {
+                for (int i = 0; i < length - 1; i++) {
+
+                }
+            }
+        }
+    }
+
+    // Computes a hash for a given string using Horner's method with base R.
+    public long hash(String t) {
+        long hash = 0;
+        int m = t.length();
+        for (int i = 0; i < m; i++) {
+            hash = (hash * R + t.charAt(i)) % P;
+        }
+        return hash;
     }
 
     /**
@@ -66,7 +95,7 @@ public class Autocorrect {
             // Maybe: sort t alphabetically here
             Collections.sort(t);
             while (!t.isEmpty()) {
-                arr[index] = t.remove(0);
+                arr[index] = t.removeFirst();
                 index++;
             }
         }
@@ -127,6 +156,8 @@ public class Autocorrect {
     public static void main(String[] args) {
         Autocorrect a = new Autocorrect(loadDictionary("large"), 2);
         Scanner s = new Scanner(System.in);
+        a.makeDict();
+        a.makeCandidates();
         while (true) {
             System.out.print("Enter word: ");
             String typed = s.nextLine();
@@ -135,7 +166,9 @@ public class Autocorrect {
             System.out.println();
             if (a.isWord(typed)) System.out.println("Congrats! Your word is, well, a word.");
             else {
-                String[] correct = a.runTest(typed);
+                String[] correct;
+                if (typed.length() == 1) correct = a.runTest(typed);
+                else correct = a.chooseCandidates(typed);
                 for (String x : correct) {
                     System.out.println(x);
                 }
