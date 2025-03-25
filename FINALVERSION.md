@@ -1,0 +1,3 @@
+Autocorrect
+
+This Autocorrect project implements a command-line tool that suggests similar words when given a potentially misspelled word. Using a dictionary of words, this program uses a combination of two-gram hashing and edit distance calculations to provide accurate suggestions. This tool can efficiently handle large dictionaries and return a list of words with the smallest edit distance to the given input word.

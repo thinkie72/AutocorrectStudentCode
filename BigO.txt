@@ -1,0 +1,53 @@
+Time Complexity Analysis
+
+1. Initializing the Data Structures
+Method: Autocorrect(String[] words, int threshold)
+
+Time Complexity:
+Trie Construction: Inserting each word into the Trie takes
+O(L) time per word, where L is the average length of the word.
+For N words, this results in a total time complexity of O(N⋅L).
+
+Candidate Sorting: The method loops through each word and hashes every two-gram in the word.
+For each word, this involves L−2 iterations, where L is the length of the word.
+Since hashing is O(1), the total time complexity for this operation is O(N⋅L), where N is the number of words in the dictionary.
+
+2. Generating All Matching Candidates for a Given Misspelled Word
+Method: chooseCandidates(String typed)
+
+Time Complexity:
+
+Two-Gram Hashing: The method loops through the characters of the input word and generates two-grams.
+The time complexity is O(L), where L is the length of the typed word.
+
+Candidate Selection: For each two-gram, the algorithm adds candidates from the sorted list based on the hash.
+The candidate selection could involve iterating through all possible candidates for each two-gram.
+In the worst case, this could be O(C), where C is the number of candidates for each two-gram.
+Therefore, the overall complexity of this method is O(L⋅C),
+where L is the length of the word and C is the average number of candidates for a given two-gram.
+
+3. Edit Distance
+Method: editDistance(String typed, String word)
+
+Time Complexity:
+
+The edit distance calculation uses dynamic programming (tabulation).
+Since the cells of the table are filled in constant time, the time is proportional to the size of the table.
+The size of the table is XY, where X and Y are the lengths of the words.
+Therefore, the time complexity is O(X⋅Y).
+
+4. Other Major Components
+Trie Lookup: O(L), where L is the length of the word being checked.
+
+Removing Candidate Duplicates: The candidates are stored in a LinkedHashSet to remove duplicates.
+The time complexity for this is O(C), where C is the number of candidates to process.
+
+Overall Time Complexity
+Initial Setup (Dictionary Loading and Trie Construction):
+O(N⋅L), where N is the number of words and L is the average word length.
+
+Generating Candidates:
+O(L⋅C), where L is the length of the typed word and C is the number of candidates per two-gram.
+
+Edit Distance Calculation:
+O(X⋅Y), where X and Y are the lengths of the typed word and the candidate word.
